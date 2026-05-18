@@ -1,11 +1,11 @@
-# 🧪 Lab 2 — Messenger Prototype
+#  Lab 2 — Messenger Prototype
 
 **Variant 3 — Offline Message Delivery**  
 **Course:** Software Design and Documentation
 
 ---
 
-## 📋 Description
+##  Description
 
 A working prototype of a messenger that **guarantees message delivery even when the recipient is offline**.
 
@@ -20,7 +20,7 @@ This implements the architecture designed in Lab 1 (Variant 3).
 
 ---
 
-## 🗂️ Project Structure
+##  Project Structure
 
 ```
 messenger/
@@ -48,7 +48,7 @@ messenger/
 
 ---
 
-## ▶️ How to Run
+##  How to Run
 
 ### 1. Install dependencies
 
@@ -111,7 +111,7 @@ Expected output: **13 tests, all OK**
 
 ---
 
-## 🔁 Offline Delivery Flow
+##  Offline Delivery Flow
 
 ```
 Alice sends message
@@ -134,7 +134,7 @@ Alice sends message
 
 ---
 
-## 🧪 Postman Testing
+##  Postman Testing
 
 1. Import `postman_collection.json` into Postman
 2. Start the server (`python main.py`)
@@ -143,7 +143,7 @@ Alice sends message
 
 ---
 
-## 🛡️ Error Handling
+##  Error Handling
 
 | Situation | HTTP Code |
 |-----------|-----------|
@@ -155,7 +155,7 @@ Alice sends message
 
 ---
 
-## 🗄️ Data Model
+##  Data Model
 
 ```
 User          Conversation       Message
@@ -170,7 +170,7 @@ name          type               conversation_id
 
 ---
 
-## 💬 Defense Questions — Answers
+##  Defense Questions — Answers
 
 **1. How does your system ensure that messages are not lost?**  
 Messages are immediately written to SQLite before any delivery attempt. Even if the server restarts, all messages remain in the DB.
