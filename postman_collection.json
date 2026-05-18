@@ -1,0 +1,197 @@
+{
+  "info": {
+    "name": "Messenger API — Variant 3: Offline Delivery",
+    "_postman_id": "lab2-variant3-offline-delivery",
+    "description": "Lab 2 — Offline Message Delivery prototype. Run requests in order for a full demo.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8000" },
+    { "key": "alice_id",  "value": "" },
+    { "key": "bob_id",    "value": "" },
+    { "key": "conv_id",   "value": "" },
+    { "key": "msg_id",    "value": "" }
+  ],
+  "item": [
+    {
+      "name": "0. Health Check",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/health"
+      }
+    },
+    {
+      "name": "1. Create User Alice",
+      "event": [{
+        "listen": "test",
+        "script": { "exec": [
+          "const json = pm.response.json();",
+          "pm.collectionVariables.set('alice_id', json.id);",
+          "pm.test('Status 201', () => pm.response.to.have.status(201));",
+          "pm.test('Has id', () => pm.expect(json.id).to.be.a('string'));"
+        ]}
+      }],
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "url": "{{base_url}}/users",
+        "body": { "mode": "raw", "raw": "{\"name\": \"Alice\"}" }
+      }
+    },
+    {
+      "name": "2. Create User Bob",
+      "event": [{
+        "listen": "test",
+        "script": { "exec": [
+          "const json = pm.response.json();",
+          "pm.collectionVariables.set('bob_id', json.id);",
+          "pm.test('Status 201', () => pm.response.to.have.status(201));"
+        ]}
+      }],
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "url": "{{base_url}}/users",
+        "body": { "mode": "raw", "raw": "{\"name\": \"Bob\"}" }
+      }
+    },
+    {
+      "name": "3. List All Users",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/users"
+      }
+    },
+    {
+      "name": "4. Set Bob OFFLINE",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "url": "{{base_url}}/users/{{bob_id}}/status",
+        "body": { "mode": "raw", "raw": "{\"online\": false}" }
+      }
+    },
+    {
+      "name": "5. Create Conversation",
+      "event": [{
+        "listen": "test",
+        "script": { "exec": [
+          "const json = pm.response.json();",
+          "pm.collectionVariables.set('conv_id', json.id);",
+          "pm.test('Status 201', () => pm.response.to.have.status(201));"
+        ]}
+      }],
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "url": "{{base_url}}/conversations",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"member_ids\": [\"{{alice_id}}\", \"{{bob_id}}\"], \"type\": \"direct\"}"
+        }
+      }
+    },
+    {
+      "name": "6. Alice Sends Message (Bob offline)",
+      "event": [{
+        "listen": "test",
+        "script": { "exec": [
+          "const json = pm.response.json();",
+          "pm.collectionVariables.set('msg_id', json.id);",
+          "pm.test('Status 201', () => pm.response.to.have.status(201));",
+          "pm.test('Status is sent', () => pm.expect(json.status).to.eql('sent'));"
+        ]}
+      }],
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "url": "{{base_url}}/messages",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"conversation_id\": \"{{conv_id}}\", \"sender_id\": \"{{alice_id}}\", \"text\": \"Hello Bob, are you there?\"}"
+        }
+      }
+    },
+    {
+      "name": "7. Get Bob's Pending Messages",
+      "event": [{
+        "listen": "test",
+        "script": { "exec": [
+          "pm.test('Status 200', () => pm.response.to.have.status(200));",
+          "pm.test('Has pending messages', () => pm.expect(pm.response.json().length).to.be.above(0));"
+        ]}
+      }],
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/users/{{bob_id}}/pending"
+      }
+    },
+    {
+      "name": "8. Bob Comes ONLINE (auto-delivery)",
+      "event": [{
+        "listen": "test",
+        "script": { "exec": [
+          "const json = pm.response.json();",
+          "pm.test('Status 200', () => pm.response.to.have.status(200));",
+          "pm.test('Delivered on reconnect > 0', () => pm.expect(json.delivered_on_reconnect).to.be.above(0));"
+        ]}
+      }],
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "url": "{{base_url}}/users/{{bob_id}}/status",
+        "body": { "mode": "raw", "raw": "{\"online\": true}" }
+      }
+    },
+    {
+      "name": "9. Get Conversation Messages (check delivered)",
+      "event": [{
+        "listen": "test",
+        "script": { "exec": [
+          "const json = pm.response.json();",
+          "pm.test('Status 200', () => pm.response.to.have.status(200));",
+          "pm.test('Message delivered', () => pm.expect(json[0].status).to.eql('delivered'));"
+        ]}
+      }],
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/conversations/{{conv_id}}/messages"
+      }
+    },
+    {
+      "name": "10. Manual ACK a message",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/messages/{{msg_id}}/ack"
+      }
+    },
+    {
+      "name": "ERR: Duplicate user → 409",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "url": "{{base_url}}/users",
+        "body": { "mode": "raw", "raw": "{\"name\": \"Alice\"}" }
+      }
+    },
+    {
+      "name": "ERR: Empty message text → 400",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "url": "{{base_url}}/messages",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"conversation_id\": \"{{conv_id}}\", \"sender_id\": \"{{alice_id}}\", \"text\": \"\"}"
+        }
+      }
+    },
+    {
+      "name": "ERR: Unknown user → 404",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/users/nonexistent-id"
+      }
+    }
+  ]
+}
