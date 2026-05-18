@@ -1,4 +1,4 @@
-# 🧪 Laboratory Work 1 — Variant 3: Offline Message Delivery
+#  Laboratory Work 1 — Variant 3: Offline Message Delivery
 
 **Student:** *(Your Name)*
 **Variant:** 3 — Offline Message Delivery
@@ -6,7 +6,7 @@
 
 ---
 
-## 🧩 Context
+##  Context
 
 This variant focuses on a scenario where users can be **offline for long periods of time**.
 The system must guarantee that **no messages are lost**, and deliver them reliably once the user reconnects.
@@ -18,7 +18,7 @@ Key engineering questions:
 
 ---
 
-## 🧱 Part 1 — Component Diagram
+##  Part 1 — Component Diagram
 
 ### Components and their responsibilities
 
@@ -62,7 +62,7 @@ graph TD
 
 ---
 
-## 🔁 Part 2 — Sequence Diagram
+##  Part 2 — Sequence Diagram
 
 ### Scenario: User A sends a message to User B who is offline
 
@@ -106,7 +106,7 @@ sequenceDiagram
 
 ---
 
-## 🔄 Part 3 — State Diagram
+##  Part 3 — State Diagram
 
 ### Object: Message
 
@@ -146,7 +146,7 @@ stateDiagram-v2
 
 ---
 
-## 📚 Part 4 — ADR (Architecture Decision Record)
+##  Part 4 — ADR (Architecture Decision Record)
 
 ---
 
